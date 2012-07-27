@@ -224,5 +224,16 @@ module Patron
       handle_request(req)
     end
 
+    def marshal_dump
+        [ @connect_timeout, @timeout, @max_redirects, @base_url, @username, @password,
+          @proxy, @proxy_type, @headers, @auth_type, @insecure, @ignore_content_length,
+          @buffer_size, @default_response_charset ]
+    end
+
+    def marshal_load data
+        @connect_timeout, @timeout, @max_redirects, @base_url, @username,
+        @password, @proxy, @proxy_type, @headers, @auth_type, @insecure,
+        @ignore_content_length, @buffer_size, @default_response_charset = data
+    end
   end
 end

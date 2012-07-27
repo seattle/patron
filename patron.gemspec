@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = "Ruby HTTP client library based on libcurl"
 
   s.required_rubygems_version = ">= 1.2.0"
-  s.rubyforge_project = "patron"
+  #s.rubyforge_project = "patron"
 
   s.add_development_dependency "bundler", ">= 1.0.0"
   s.add_development_dependency "rake-compiler", ">= 0.7.5"
