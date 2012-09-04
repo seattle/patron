@@ -79,7 +79,8 @@ module Patron
     attr_accessor :default_response_charset
 
     private :handle_request, :enable_cookie_session, :set_debug_file
-
+    private :curl_dump, :curl_load
+        
     # Create a new Session object.
     def initialize
       @headers = {}
@@ -227,13 +228,15 @@ module Patron
     def marshal_dump
         [ @connect_timeout, @timeout, @max_redirects, @base_url, @username, @password,
           @proxy, @proxy_type, @headers, @auth_type, @insecure, @ignore_content_length,
-          @buffer_size, @default_response_charset ]
+          @buffer_size, @default_response_charset, curl_dump ]
     end
 
     def marshal_load data
         @connect_timeout, @timeout, @max_redirects, @base_url, @username,
         @password, @proxy, @proxy_type, @headers, @auth_type, @insecure,
-        @ignore_content_length, @buffer_size, @default_response_charset = data
+        @ignore_content_length, @buffer_size, @default_response_charset,
+        curl = data
+        curl_load curl
     end
   end
 end

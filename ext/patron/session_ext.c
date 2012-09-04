@@ -57,7 +57,7 @@ struct curl_state {
   membuffer body_buffer;
   int interrupt;
 };
-
+typedef struct curl_state curl_state_t;
 
 /*----------------------------------------------------------------------------*/
 /* Curl Callbacks                                                             */
@@ -681,6 +681,44 @@ static VALUE set_debug_file(VALUE self, VALUE file) {
   return self;
 }
 
+/*  call-seq:
+ *    curl_dump
+ *  This method is called by Marshal.dump().
+ *
+ *  @return [String] a byte stream
+ *  @see OraDate._load
+ */
+static VALUE session_curl_dump(VALUE self)
+{
+    struct curl_state *state = get_curl_state(self);
+    Data_Get_Struct(self, struct curl_state, state);
+    return rb_str_new((const char*)state, sizeof(curl_state_t)); /* ASCII-8BIT */
+}
+
+/*
+ *  call-seq:
+ *    curl_load(bytes)
+ *
+ *  Restores a byte stream serialized by {Patron::Session#_dump}.
+ *  This method is called by Marshal.load() to deserialize a byte stream
+ *  created by Marshal.dump().
+ *
+ *  @param [String] bytes a byte stream
+ *  @return [curl_state] an deserialized object
+ */
+static VALUE session_curl_load(VALUE self, VALUE str)
+{
+    struct curl_state *state;
+    VALUE obj;
+
+    Check_Type(str, T_STRING);
+    if (RSTRING_LEN(str) != sizeof(curl_state_t)) {
+        rb_raise(rb_eTypeError, "marshaled cURL session format differ");
+    }
+    obj = Data_Make_Struct(cSession, curl_state_t, NULL, NULL, state);
+    memcpy(state, RSTRING_PTR(str), sizeof(curl_state_t));
+    return obj;
+}
 
 /*----------------------------------------------------------------------------*/
 /* Extension initialization                                                   */
@@ -716,6 +754,8 @@ void Init_session_ext() {
   rb_define_method(cSession, "interrupt",      session_interrupt,      0);
   rb_define_method(cSession, "enable_cookie_session", enable_cookie_session, 1);
   rb_define_method(cSession, "set_debug_file", set_debug_file, 1);
+  rb_define_method(cSession, "curl_dump", session_curl_dump, 0);
+  rb_define_method(cSession, "curl_load", session_curl_load, 1);
   rb_define_alias(cSession, "urlencode", "escape");
   rb_define_alias(cSession, "urldecode", "unescape");
 
